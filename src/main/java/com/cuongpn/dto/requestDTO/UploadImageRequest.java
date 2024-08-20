@@ -1,19 +1,15 @@
 package com.cuongpn.dto.requestDTO;
 
-import com.cuongpn.dto.validator.PasswordMatch;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@PasswordMatch
-public class ResetPasswordRequestDto {
-    String token;
-
-    String newPassword;
-
-    String confirmPassword;
+public class UploadImageRequest {
+    @NotNull
+    private MultipartFile image;
 }

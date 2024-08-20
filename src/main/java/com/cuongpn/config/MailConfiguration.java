@@ -20,6 +20,8 @@ public class MailConfiguration {
 
     @Value("${spring.mail.password}")
     private String mailPassword;
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable}")
+    private String mailSmtpstarttlsEnable;
 
 
     @Bean
@@ -30,7 +32,7 @@ public class MailConfiguration {
         mailSender.setUsername(mailUsername);
         mailSender.setPassword(mailPassword);
         Properties properties = mailSender.getJavaMailProperties();
-        properties.put("mail.smtp.starttls.enable", "true");
+        properties.put("mail.smtp.starttls.enable", mailSmtpstarttlsEnable);
         return mailSender;
 
     }

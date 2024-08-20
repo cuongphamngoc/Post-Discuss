@@ -4,17 +4,27 @@ import com.cuongpn.dto.requestDTO.*;
 import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.dto.responeDTO.TokenResponse;
 import com.cuongpn.dto.responeDTO.UserResponseDTO;
+import com.cuongpn.entity.User;
 import com.cuongpn.exception.UserAlreadyExistException;
+
+import java.io.IOException;
 
 public interface AuthenticationService {
 
     public ResponseData<TokenResponse> login(LoginRequest request) ;
 
+    ResponseData<TokenResponse> login(User user);
+
     ResponseData<UserResponseDTO> register(RegisterRequest request) throws UserAlreadyExistException;
 
-    public ResponseData<Void> forgot(ForgotPasswordRequest request);
+    public ResponseData<?> forgot(ForgotPasswordRequest request);
 
-    public ResponseData<Void> verifyAccount(VerificationRequest verificationRequest);
+    public ResponseData<?> verifyAccount(String token );
 
-    ResponseData<Void> reset(String token, ResetPasswordRequestDto resetPasswordRequestDto);
+    ResponseData<?> reset( ResetPasswordRequestDto resetPasswordRequestDto);
+
+    ResponseData<TokenResponse> loginWithGoogle(TokenRequest request) throws IOException;
+    boolean emailExists(String mail);
+
+    ResponseData<?> getNewToken(TokenRequest refreshToken);
 }

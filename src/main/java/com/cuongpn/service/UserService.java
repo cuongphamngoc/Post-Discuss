@@ -1,8 +1,11 @@
 package com.cuongpn.service;
 
-import com.cuongpn.dto.requestDTO.RegisterRequest;
+import com.cuongpn.dto.requestDTO.ChangePasswordRequestDto;
 import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.dto.responeDTO.UserResponseDTO;
+import com.cuongpn.entity.User;
+import com.cuongpn.security.services.CurrentUser;
+import com.cuongpn.security.services.UserPrincipal;
 
 
 import java.util.List;
@@ -13,5 +16,11 @@ public interface UserService {
 
     ResponseData<UserResponseDTO> getUserById(Integer id) ;
 
+    boolean isExistMail(String mail);
+    User checkAndCreateUser(String email);
 
+    User getUserByMail(String email);
+
+
+    ResponseData<?> changePassword(@CurrentUser UserPrincipal currentUser, ChangePasswordRequestDto changePasswordRequestDto);
 }

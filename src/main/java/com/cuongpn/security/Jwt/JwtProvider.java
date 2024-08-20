@@ -14,12 +14,25 @@ public class JwtProvider {
     @Value("${jwt.data.secret.key}")
     private String jwtSecret;
 
-    @Value("${jwt.data.expirationTimemlss}")
-    private Long expirationTime;
+    @Value("${jwt.data.accessToken.expirationSecond}")
+    private Long accessTokenExpirationTime;
+    @Value("${jwt.data.refreshToken.expirationSecond}")
+    private Long refreshTokenExpirationTime;
 
     public String generateAcessToken(String username){
         Date now = new Date();
-        Date expirationTimemlss = new Date(now.getTime() + expirationTime);
+        Date expirationTimemlss = new Date(now.getTime() + accessTokenExpirationTime);
+        return Jwts
+                .builder()
+                .signWith(SignatureAlgorithm.HS512,jwtSecret)
+                .setSubject(username)
+                .setIssuedAt(now)
+                .setExpiration(expirationTimemlss)
+                .compact();
+    }
+    public String generateRefreshToken(String username){
+        Date now = new Date();
+        Date expirationTimemlss = new Date(now.getTime() + refreshTokenExpirationTime);
         return Jwts
                 .builder()
                 .signWith(SignatureAlgorithm.HS512,jwtSecret)

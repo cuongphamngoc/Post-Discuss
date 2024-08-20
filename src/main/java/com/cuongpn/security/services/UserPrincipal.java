@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,12 +18,9 @@ import java.util.Objects;
 
 @Data
 @AllArgsConstructor
-@Getter
+@NoArgsConstructor
+public class UserPrincipal implements UserDetails {
 
-public class UserDetailsImpl implements UserDetails {
-    private Long id;
-
-    private String username;
 
     private String email;
 
@@ -30,9 +28,9 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
-    public static UserDetailsImpl build(User user){
+    public static UserPrincipal build(User user){
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
-        return new UserDetailsImpl(user.getUserid(),user.getUsername(),user.getEmail(),user.getPassword(),authorities);
+        return new UserPrincipal(user.getEmail(),user.getPassword(),authorities);
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -46,7 +44,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
     @Override
     public boolean isAccountNonExpired() {
@@ -74,7 +72,7 @@ public class UserDetailsImpl implements UserDetails {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        UserDetailsImpl user = (UserDetailsImpl) o;
-        return Objects.equals(id, user.id);
+        UserPrincipal user = (UserPrincipal) o;
+        return Objects.equals(email, user.email);
     }
 }

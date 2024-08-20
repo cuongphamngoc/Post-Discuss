@@ -1,6 +1,6 @@
 package com.cuongpn.dto.requestDTO;
 
-import jakarta.validation.constraints.Email;
+import com.cuongpn.dto.validator.PasswordMatch;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,8 +11,12 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ForgotPasswordRequest implements Serializable {
+
+public class ChangePasswordRequestDto implements Serializable {
     @NotBlank
-    @Email
-    String email;
+    String oldPassword;
+    @NotBlank
+    String newPassword;
+    @NotBlank
+    String confirmPassword;
 }

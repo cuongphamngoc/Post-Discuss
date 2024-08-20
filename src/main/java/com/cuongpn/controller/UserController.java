@@ -1,10 +1,14 @@
 package com.cuongpn.controller;
 
 
+import com.cuongpn.dto.requestDTO.ChangePasswordRequestDto;
 import com.cuongpn.dto.requestDTO.UserRequestDTO;
 import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.dto.responeDTO.UserResponseDTO;
+import com.cuongpn.security.services.CurrentUser;
+import com.cuongpn.security.services.UserPrincipal;
 import com.cuongpn.service.UserService;
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,11 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseData<UserResponseDTO> getUserbyId(@NonNull @PathVariable Integer id){
         return userService.getUserById(id);
+    }
+    @PostMapping("/change-password")
+    public ResponseData<?> changePassword(@CurrentUser UserPrincipal current,@RequestBody @Valid ChangePasswordRequestDto changePasswordRequestDto){
+        System.out.println(changePasswordRequestDto);
+        return userService.changePassword(current, changePasswordRequestDto);
     }
 
 

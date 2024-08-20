@@ -16,11 +16,11 @@ public class ResponseError {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private Date timestamp;
     private int status;
-
+    private String path;
     private String error;
     private String message;
 
-    private String path;
+
 
     public ResponseError( int status, String error, String message, String path) {
         this.timestamp = new Date();
