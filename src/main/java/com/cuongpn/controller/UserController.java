@@ -1,8 +1,7 @@
 package com.cuongpn.controller;
 
 
-import com.cuongpn.dto.requestDTO.ChangePasswordRequestDto;
-import com.cuongpn.dto.requestDTO.UserRequestDTO;
+import com.cuongpn.dto.requestDTO.ChangePasswordRequestDTO;
 import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.dto.responeDTO.UserResponseDTO;
 import com.cuongpn.security.services.CurrentUser;
@@ -11,8 +10,6 @@ import com.cuongpn.service.UserService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,14 +28,19 @@ public class UserController {
         return userService.getAllUser();
     }
     @GetMapping("/{id}")
-    public ResponseData<UserResponseDTO> getUserbyId(@NonNull @PathVariable Integer id){
+    public ResponseData<UserResponseDTO> getUserbyId(@NonNull @PathVariable Long id){
         return userService.getUserById(id);
     }
     @PostMapping("/change-password")
-    public ResponseData<?> changePassword(@CurrentUser UserPrincipal current,@RequestBody @Valid ChangePasswordRequestDto changePasswordRequestDto){
+    public ResponseData<?> changePassword(@CurrentUser UserPrincipal current,@RequestBody @Valid ChangePasswordRequestDTO changePasswordRequestDto){
         System.out.println(changePasswordRequestDto);
         return userService.changePassword(current, changePasswordRequestDto);
     }
+    @PostMapping("/bookmarks/{id}")
+    public ResponseData<?> bookMarkArticle(@CurrentUser UserPrincipal current, @PathVariable("id") Long id){
+        return userService.bookMarkArticle(current,id);
+    }
+
 
 
 }

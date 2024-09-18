@@ -1,11 +1,11 @@
 package com.cuongpn.controller;
 
-import com.cuongpn.dto.requestDTO.UploadImageRequest;
+import com.cuongpn.dto.requestDTO.UploadImageRequestDTO;
+import com.cuongpn.dto.responeDTO.FileResponseDTO;
 import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.service.FileService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class FileController {
     private FileService fileService;
     @PostMapping("/upload")
-    public ResponseData<?> upload(@ModelAttribute  @Valid UploadImageRequest request){
+    public ResponseData<FileResponseDTO> upload(@ModelAttribute  @Valid UploadImageRequestDTO request){
         return fileService.upLoadFile(request.getImage());
     }
 }

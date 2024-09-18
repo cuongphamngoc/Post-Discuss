@@ -3,6 +3,7 @@ package com.cuongpn.dto.requestDTO;
 import lombok.Data;
 
 @Data
-public class UserRequestDTO {
-    private String email;
+public class PageRequestDTO {
+    int pageSize;
+    int pageNum;
 }

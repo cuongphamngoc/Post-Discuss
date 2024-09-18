@@ -1,6 +1,5 @@
 package com.cuongpn.dto.validator;
 
-import com.cuongpn.dto.requestDTO.ResetPasswordRequestDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

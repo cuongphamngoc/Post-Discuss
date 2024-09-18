@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ForgotPasswordRequest implements Serializable {
+public class ForgotPasswordRequest  {
     @NotBlank
     @Email
     String email;

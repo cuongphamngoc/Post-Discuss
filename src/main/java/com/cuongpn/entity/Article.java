@@ -5,10 +5,10 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,24 +16,30 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "Article")
+@Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Article {
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String title;
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false,unique = true, length = 300)
     private String slug;
 
     private String summary;
-
+    @Column(length = 2147483647,columnDefinition="Text")
     private String content;
+
+    private String imageUrl;
     @Column
     private Long views;
     @CreatedDate
-    private Date created_at;
+    @Column(name = "created_at")
+    private Date createdAt;
     @LastModifiedDate
-    private Date updated_at;
+    @Column(name ="updated_at")
+    private Date updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -57,7 +63,7 @@ public class Article {
     private Set<Tag> tags = new HashSet<>();
 
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
-    private Set<Comment> comments = new HashSet<>();
+    private Set<ArticleComment> comments = new HashSet<>();
 
 
 

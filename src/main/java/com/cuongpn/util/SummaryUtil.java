@@ -1,10 +1,14 @@
 package com.cuongpn.util;
 
+import org.jsoup.Jsoup;
+
 public class SummaryUtil {
     public static String makeSummary(String context) {
-        if(context.length() >= 97){
-            return context.substring(0, 97);
+        String textContent = Jsoup.parse(context).text();
+        System.out.println(textContent);
+        if(textContent.length() >= 297){
+            return textContent.substring(0, 297);
         }
-        return context+"...";
+        return textContent+"...";
     }
 }

@@ -1,5 +1,6 @@
 package com.cuongpn.service.Impl;
 
+import com.cuongpn.dto.responeDTO.FileResponseDTO;
 import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.exception.StorageException;
 import com.cuongpn.service.FileService;
@@ -26,11 +27,12 @@ public class FileUploadService implements FileService {
         init();
     }
     @Override
-    public ResponseData<?> upLoadFile(MultipartFile multipartFile) {
+    public ResponseData<FileResponseDTO> upLoadFile(MultipartFile multipartFile) {
         try{
             if(multipartFile.isEmpty()){
                 throw new StorageException("Failed to store empty file.");
             }
+
             Path destinationFile = rootLocation.resolve(
                             Objects.requireNonNull(multipartFile.getOriginalFilename()))
                     .normalize().toAbsolutePath();
@@ -42,7 +44,7 @@ public class FileUploadService implements FileService {
                 Files.copy(inputStream,destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
             String fileUrl = baseUrl + destinationFile.getFileName().toString();
-            return new ResponseData<>(HttpStatus.CREATED.value(), "File upload success",fileUrl);
+            return new ResponseData<>(HttpStatus.CREATED.value(), "File upload success",new FileResponseDTO(destinationFile.getFileName().toString(),fileUrl));
 
         }
         catch (IOException e){

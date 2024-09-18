@@ -20,8 +20,6 @@ public class Tag {
 
     String name;
 
-    String description;
-
     @ManyToMany(mappedBy = "tags")
     private Set<Article> articles = new HashSet<>();
 

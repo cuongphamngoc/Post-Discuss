@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UploadImageRequest {
+public class UploadImageRequestDTO {
     @NotNull
     private MultipartFile image;
 }

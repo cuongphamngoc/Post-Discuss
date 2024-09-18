@@ -11,20 +11,20 @@ import java.io.IOException;
 
 public interface AuthenticationService {
 
-    public ResponseData<TokenResponse> login(LoginRequest request) ;
+    public ResponseData<TokenResponse> login(LoginRequestDTO request) ;
 
     ResponseData<TokenResponse> login(User user);
 
-    ResponseData<UserResponseDTO> register(RegisterRequest request) throws UserAlreadyExistException;
+    ResponseData<UserResponseDTO> register(RegisterRequestDTO request) throws UserAlreadyExistException;
 
     public ResponseData<?> forgot(ForgotPasswordRequest request);
 
     public ResponseData<?> verifyAccount(String token );
 
-    ResponseData<?> reset( ResetPasswordRequestDto resetPasswordRequestDto);
+    ResponseData<?> reset( ResetPasswordRequestDTO resetPasswordRequestDto);
 
-    ResponseData<TokenResponse> loginWithGoogle(TokenRequest request) throws IOException;
+    ResponseData<TokenResponse> loginWithGoogle(RefreshTokenRequestDTO request) throws IOException;
     boolean emailExists(String mail);
 
-    ResponseData<?> getNewToken(TokenRequest refreshToken);
+    ResponseData<?> getNewToken(RefreshTokenRequestDTO refreshToken);
 }

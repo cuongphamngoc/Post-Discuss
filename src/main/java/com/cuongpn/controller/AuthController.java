@@ -20,20 +20,20 @@ import java.io.IOException;
 public class AuthController {
     private AuthenticationService authenticationService;
     @PostMapping("/login")
-    public ResponseData<TokenResponse> login(@Valid @RequestBody LoginRequest request){
+    public ResponseData<TokenResponse> login(@Valid @RequestBody LoginRequestDTO request){
         return authenticationService.login(request);
 
     }
-    @GetMapping("/emailExist/{email}")
+    @GetMapping("/email-exists/{email}")
     public boolean checkEmailExist(@PathVariable("email") String email){
         return authenticationService.emailExists(email);
     }
-    @PostMapping("/loginWithGoogle")
-    public ResponseData<TokenResponse> loginWithGoogle(@Valid @RequestBody TokenRequest request) throws IOException {
+    @PostMapping("/login/google")
+    public ResponseData<TokenResponse> loginWithGoogle(@Valid @RequestBody RefreshTokenRequestDTO request) throws IOException {
         return authenticationService.loginWithGoogle(request);
     }
     @PostMapping("/register")
-    public ResponseData<UserResponseDTO> register(@Valid @RequestBody RegisterRequest request)  {
+    public ResponseData<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request)  {
         return authenticationService.register(request);
 
     }
@@ -46,11 +46,11 @@ public class AuthController {
         return authenticationService.verifyAccount(token);
     }
     @PostMapping("/reset-password")
-    public ResponseData<?> resetPassword( @RequestBody ResetPasswordRequestDto resetPasswordRequestDto){
+    public ResponseData<?> resetPassword( @RequestBody ResetPasswordRequestDTO resetPasswordRequestDto){
         return authenticationService.reset(resetPasswordRequestDto);
     }
     @PostMapping("/refresh-token")
-    public ResponseData<?> getNewToken(@Valid @RequestBody  TokenRequest refreshToken){
+    public ResponseData<?> getNewToken(@Valid @RequestBody RefreshTokenRequestDTO refreshToken){
         return authenticationService.getNewToken(refreshToken);
     }
 }

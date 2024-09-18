@@ -24,13 +24,17 @@ public class UserPrincipal implements UserDetails {
 
     private String email;
 
+    private String fullName;
+
     @JsonIgnore
     private String password;
+
+    private String avatarUrl;
 
     private Collection<? extends GrantedAuthority> authorities;
     public static UserPrincipal build(User user){
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
-        return new UserPrincipal(user.getEmail(),user.getPassword(),authorities);
+        return new UserPrincipal(user.getEmail(),user.getName(),user.getPassword(),user.getAvatarUrl(),authorities);
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

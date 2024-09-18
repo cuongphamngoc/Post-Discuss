@@ -7,7 +7,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class LoginRequest {
+public class LoginRequestDTO {
     @Email(message =    "${Email.message}")
     String email;
 

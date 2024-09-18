@@ -1,6 +1,7 @@
 package com.cuongpn.dto.requestDTO;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TokenRequest {
-    @NotBlank
+public class VerificationRequestDTO {
+    @NotNull
     String token;
+    @Email
+    String email;
 }

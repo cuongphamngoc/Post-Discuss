@@ -8,8 +8,9 @@ import com.cuongpn.entity.EmailDetails;
 import com.cuongpn.entity.User;
 import com.cuongpn.exception.UserAlreadyExistException;
 import com.cuongpn.mapper.UserMapper;
-import com.cuongpn.repository.UserRepo;
+import com.cuongpn.repository.UserRepository;
 import com.cuongpn.security.Jwt.JwtProvider;
+import com.cuongpn.security.services.UserPrincipal;
 import com.cuongpn.service.AuthenticationService;
 import com.cuongpn.service.EmailSenderService;
 import com.cuongpn.service.OtpService;
@@ -18,6 +19,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import io.jsonwebtoken.Claims;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,33 +46,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private String googleClientId;
     @Value("${secret.password}")
     private String secretPassword;
-    private AuthenticationManager authenticationManager;
-    private EmailSenderService emailSenderService;
-    private UserService userService;
-    private JwtProvider jwtProvider;
-    private UserRepo userRepo;
-    private PasswordEncoder passwordEncoder;
-    private UserMapper userMapper;
-    private OtpService otpService;
+    private final AuthenticationManager authenticationManager;
+    private final EmailSenderService emailSenderService;
+    private final UserService userService;
+    private final JwtProvider jwtProvider;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final OtpService otpService;
 
-    public AuthenticationServiceImpl(AuthenticationManager authenticationManager, EmailSenderService emailSenderService, UserService userService, JwtProvider jwtProvider, UserRepo userRepo, PasswordEncoder passwordEncoder, UserMapper userMapper, OtpService otpService) {
+    public AuthenticationServiceImpl(AuthenticationManager authenticationManager, EmailSenderService emailSenderService, UserService userService, JwtProvider jwtProvider, UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, OtpService otpService) {
         this.authenticationManager = authenticationManager;
         this.emailSenderService = emailSenderService;
         this.userService = userService;
         this.jwtProvider = jwtProvider;
-        this.userRepo = userRepo;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.otpService = otpService;
     }
 
     @Override
-    public ResponseData<TokenResponse> login(LoginRequest request) {
+    public ResponseData<TokenResponse> login(LoginRequestDTO request) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword());
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        TokenResponse token = new TokenResponse(jwtProvider.generateAcessToken(authentication.getName()),
-                jwtProvider.generateRefreshToken(authentication.getName()));
+        System.out.println(authentication.getPrincipal());
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        TokenResponse token = new TokenResponse(jwtProvider.generateAccessToken(userPrincipal),
+                jwtProvider.generateRefreshToken(userPrincipal));
         
         return new ResponseData<>(HttpStatus.OK.value(),"Login Success!",token);
 
@@ -85,22 +89,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         Collections.singletonList(new SimpleGrantedAuthority(user.getRole()))
                 ));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        TokenResponse token = new TokenResponse(jwtProvider.generateAcessToken(authentication.getName()),
-                jwtProvider.generateRefreshToken(authentication.getName()));
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        TokenResponse token = new TokenResponse(jwtProvider.generateAccessToken(userPrincipal),
+                jwtProvider.generateRefreshToken(userPrincipal));
         return new ResponseData<>(HttpStatus.OK.value(),"Login Success!",token);
     }
 
     @Override
-    public ResponseData<UserResponseDTO> register(RegisterRequest request) throws UserAlreadyExistException{
+    public ResponseData<UserResponseDTO> register(RegisterRequestDTO request) throws UserAlreadyExistException{
         String email = request.getEmail();
 
         if (userService.isExistMail(email)) {
             throw new IllegalArgumentException("Email already exists: " + email);
         }
         String verifyToken = generateToken();
-        User user = new User(request.getEmail(),passwordEncoder.encode(request.getPassword()),request.getFullname(),"ROLE_USER");
+        User user = new User(request.getEmail(),passwordEncoder.encode(request.getPassword()),request.getFullName(),"ROLE_USER");
         user.setVerificationToken(verifyToken);
-        User res = userRepo.save(user);
+        User res = userRepository.save(user);
         String verificationUrl = "http://localhost:4200/verify-account?token=" + verifyToken;
         EmailDetails emailDetails = new EmailDetails();
         emailDetails.setSubject("Verify Your Account");
@@ -125,7 +130,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseData<?> forgot(ForgotPasswordRequest request) {
         String email = request.getEmail();
         log.info("Searching for email: " + email);
-        User user = userRepo.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("Email not found: " + email));
+        User user = userRepository.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("Email not found: " + email));
 
         String verifyToken = generateToken();
         otpService.saveMail(verifyToken,email);
@@ -152,27 +157,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public ResponseData<?> verifyAccount(String token) {
-        User user = userRepo.findByVerificationToken(token).orElseThrow(
+        User user = userRepository.findByVerificationToken(token).orElseThrow(
                 ()-> new IllegalArgumentException("Token invalid ")
         );
         user.setVerification(true);
         user.setVerificationToken(null);
-        userRepo.save(user);
+        userRepository.save(user);
         return new ResponseData<>(HttpStatus.OK.value(), "Account Verification successful");
     }
 
     @Override
-    public ResponseData<?> reset( ResetPasswordRequestDto resetPasswordRequestDto) {
+    public ResponseData<?> reset( ResetPasswordRequestDTO resetPasswordRequestDto) {
         String email = otpService.getMail(resetPasswordRequestDto.getToken());
         System.out.println(resetPasswordRequestDto);
-        User user = userRepo.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("Email not found " +email));
+        User user = userRepository.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("Email not found " +email));
         user.setPassword(passwordEncoder.encode(resetPasswordRequestDto.getNewPassword()));
-        userRepo.save(user);
+        userRepository.save(user);
         return new ResponseData<>(HttpStatus.OK.value(), "Password change success");
     }
 
     @Override
-    public ResponseData<TokenResponse> loginWithGoogle(TokenRequest request) throws IOException {
+    public ResponseData<TokenResponse> loginWithGoogle(RefreshTokenRequestDTO request) throws IOException {
         final NetHttpTransport transport = new NetHttpTransport();
         final JacksonFactory jacksonFactory = JacksonFactory.getDefaultInstance();
         GoogleIdTokenVerifier.Builder verifier = new GoogleIdTokenVerifier.Builder(transport,jacksonFactory)
@@ -188,15 +193,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     public boolean emailExists(String mail) {
-        return userRepo.findByEmail(mail).isPresent();
+        return userRepository.findByEmail(mail).isPresent();
     }
 
     @Override
-    public ResponseData<?> getNewToken(TokenRequest refreshToken) {
+    public ResponseData<?> getNewToken(RefreshTokenRequestDTO refreshToken) {
         if(jwtProvider.validateToken(refreshToken.getToken())){
-            String username = jwtProvider.getUsernameFromToken(refreshToken.getToken());
-            String newAccessToken = jwtProvider.generateAcessToken(username);
-            String newRefreshToken = jwtProvider.generateRefreshToken(username);
+            Claims claims = jwtProvider.getClaimsFromToken(refreshToken.getToken());
+            String newAccessToken = jwtProvider.generateAccessTokenFromClaims(claims);
+            String newRefreshToken = jwtProvider.generateRefreshTokenFromClaims(claims);
             return new ResponseData<TokenResponse>(HttpStatus.OK.value(), "Get token success",new TokenResponse(newAccessToken,newRefreshToken));
         }
         else{
