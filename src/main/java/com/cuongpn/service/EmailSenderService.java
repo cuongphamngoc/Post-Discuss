@@ -1,10 +1,15 @@
 package com.cuongpn.service;
 
-import com.cuongpn.entity.EmailDetails;
-import jakarta.mail.MessagingException;
+import com.cuongpn.entity.EmailDetail;
+import org.springframework.scheduling.annotation.Async;
 
 public interface EmailSenderService {
-    String sendSimpleMail(EmailDetails details);
 
-    String sendMailWithAttachment(EmailDetails details) ;
+
+    @Async
+    void sendSimpleMail(EmailDetail detail);
+
+
+    @Async
+    void sendMailWithAttachment(EmailDetail detail);
 }

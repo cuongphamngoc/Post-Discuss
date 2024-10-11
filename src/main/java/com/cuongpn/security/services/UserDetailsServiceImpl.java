@@ -1,6 +1,8 @@
 package com.cuongpn.security.services;
 
 import com.cuongpn.entity.User;
+import com.cuongpn.exception.AppException;
+import com.cuongpn.exception.ErrorCode;
 import com.cuongpn.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -17,8 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserPrincipal loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmailAndIsVerification(email,true).orElseThrow(() -> new UsernameNotFoundException("User" +
-                " not found with mail: "+email));
+        User user = userRepository.findByEmailAndIsVerification(email,true).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
 
         return UserPrincipal.build(user);
     }

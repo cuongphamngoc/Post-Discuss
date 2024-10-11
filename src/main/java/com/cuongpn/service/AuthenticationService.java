@@ -1,7 +1,6 @@
 package com.cuongpn.service;
 
 import com.cuongpn.dto.requestDTO.*;
-import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.dto.responeDTO.TokenResponse;
 import com.cuongpn.dto.responeDTO.UserResponseDTO;
 import com.cuongpn.entity.User;
@@ -11,20 +10,20 @@ import java.io.IOException;
 
 public interface AuthenticationService {
 
-    public ResponseData<TokenResponse> login(LoginRequestDTO request) ;
+    public TokenResponse login(LoginRequestDTO request) ;
 
-    ResponseData<TokenResponse> login(User user);
+    TokenResponse login(User user);
 
-    ResponseData<UserResponseDTO> register(RegisterRequestDTO request) throws UserAlreadyExistException;
+    UserResponseDTO register(RegisterRequestDTO request) throws UserAlreadyExistException;
 
-    public ResponseData<?> forgot(ForgotPasswordRequest request);
+    public void forgotPassword(ForgotPasswordDTO request);
 
-    public ResponseData<?> verifyAccount(String token );
+    public void verifyAccount(String token );
 
-    ResponseData<?> reset( ResetPasswordRequestDTO resetPasswordRequestDto);
+    void resetPassword(ResetPasswordDTO resetPasswordDto);
 
-    ResponseData<TokenResponse> loginWithGoogle(RefreshTokenRequestDTO request) throws IOException;
+    TokenResponse loginWithGoogle(RefreshTokenDTO request) throws IOException;
     boolean emailExists(String mail);
 
-    ResponseData<?> getNewToken(RefreshTokenRequestDTO refreshToken);
+    TokenResponse getNewToken(RefreshTokenDTO refreshToken);
 }

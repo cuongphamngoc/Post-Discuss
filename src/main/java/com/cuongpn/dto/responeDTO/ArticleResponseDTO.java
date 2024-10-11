@@ -3,8 +3,10 @@ package com.cuongpn.dto.responeDTO;
 import com.cuongpn.entity.Tag;
 import lombok.Data;
 import org.mapstruct.Mapping;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -21,20 +23,18 @@ public class ArticleResponseDTO {
 
     private String imageUrl;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdDate;
 
-    private LocalDateTime updatedAt;
+    private LocalDateTime lastModifiedDate;
 
-    private Long views;
+    private Long views = 0L ;
 
-    private Set<Tag> tags;
+    private List<TagDTO> tags;
 
-    private Author author;
+    private Page<CommentDTO> comments;
 
-    @Data
-    public static class Author{
-        private Long id;
-        private String name;
-        private String avatarUrl;
-    }
+    private VoteCount voteCount;
+
+    private AuthorDTO author;
+
 }

@@ -1,15 +1,16 @@
 package com.cuongpn.service.Impl;
 
-import com.cuongpn.dto.requestDTO.ArticleRequestDTO;
-import com.cuongpn.dto.responeDTO.ArticleResponseDTO;
-import com.cuongpn.dto.responeDTO.PaginatedArticleResponseDTO;
+import com.cuongpn.dto.requestDTO.CreateArticleDTO;
+import com.cuongpn.dto.responeDTO.*;
 import com.cuongpn.entity.Article;
 import com.cuongpn.entity.Tag;
+import com.cuongpn.exception.AppException;
+import com.cuongpn.exception.ErrorCode;
 import com.cuongpn.mapper.ArticleMapper;
 import com.cuongpn.repository.ArticleRepository;
 import com.cuongpn.service.ArticleService;
+import com.cuongpn.service.CommentService;
 import com.cuongpn.service.TagService;
-import com.cuongpn.service.UserService;
 import com.cuongpn.util.SlugUtil;
 import com.cuongpn.util.SummaryUtil;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,9 +33,10 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepo;
     private final TagService tagService;
     private final ArticleMapper articleMapper;
+    private final CommentService commentService;
 
     @Override
-    public ArticleResponseDTO saveArticle(ArticleRequestDTO requestDTO) {
+    public ArticleDetailDTO saveArticle(CreateArticleDTO requestDTO) {
         Set<Tag> tags = Optional.ofNullable(requestDTO.getTags())
                 .map(tagSet -> tagSet.stream()
                         .map(tagService::getTagByTagName)
@@ -44,57 +45,55 @@ public class ArticleServiceImpl implements ArticleService {
         Article article =  Article.builder()
                 .title(requestDTO.getTitle())
                 .slug(SlugUtil.makeSlug(requestDTO.getTitle()))
-                .content(Jsoup.clean(requestDTO.getContent(), Safelist.basicWithImages()))
-                .tags(tags)
                 .summary(SummaryUtil.makeSummary(requestDTO.getContent()))
                 .imageUrl(requestDTO.getImage())
                 .build();
+        Safelist customSafelist = Safelist.basicWithImages()
+                .addTags("h1", "h2", "h3", "h4", "h5", "h6", "pre");
+        article.setContent(Jsoup.clean(requestDTO.getContent(), customSafelist));
+        article.setTags(tags);
         Article response = articleRepo.save(article);
-        return articleMapper.articleToArticleResponseDTO(response);
+        return articleMapper.toArticleDetailDTO(response);
 
 
     }
 
     @Override
-    public List<ArticleResponseDTO> getAll() {
-        return articleRepo.findAll().stream().map(articleMapper::articleToArticleResponseDTO).toList();
+    public Page<ArticleDTO> getAll(Pageable pageable) {
+        return articleRepo.findAll(pageable).map(articleMapper::toArticleDTO);
     }
 
     @Override
-    public ArticleResponseDTO getArticleBySlug(String slug) {
-        Article article = articleRepo.findBySlug(slug).orElseThrow(()-> new IllegalArgumentException("Article not found with slug "+ slug));
-        return articleMapper.articleToArticleResponseDTO(article);
+    public ArticleDetailDTO getArticleBySlug(String slug) {
+        Article article = articleRepo.findBySlug(slug).orElseThrow(()-> new AppException(ErrorCode.ARTICLE_NOT_EXISTED));
+        Pageable pageable = PageRequest.of(0,10, Sort.Direction.ASC,"createdDate");
+        Page<CommentDTO>  commentDTOS = commentService.getCommentsByPostId(article.getId(),pageable);
+        ArticleDetailDTO articleDetailDTO = articleMapper.toArticleDetailDTO(article);
+        articleDetailDTO.setComments(commentDTOS);
+
+        return articleDetailDTO;
     }
 
     @Override
     public Article getArticleById(Long id) {
-        return articleRepo.findById(id).orElseThrow(()-> new IllegalArgumentException("Article not found with slug "+ id));
+        return  articleRepo.findById(id).orElseThrow(()-> new AppException(ErrorCode.ARTICLE_NOT_EXISTED));
 
     }
 
     @Override
-    public PaginatedArticleResponseDTO getLatestArticleByPage(int pageSize, int pageNum) {
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
-        Page<Article> res =  articleRepo.findAll(pageable);
-        long totalCount = res.getTotalElements();
-        int currentPage = res.getNumber();
-        return PaginatedArticleResponseDTO.builder()
-                .articles(res.getContent().stream().map(articleMapper::articleToArticleResponseDTO).toList())
-                .totalArticles(totalCount)
-                .currentPage(currentPage)
-                .build();
-
-    }
-
-    @Override
-    public PaginatedArticleResponseDTO getLatestArticleByPageAndTag(String tag, int pageSize, int PageNum) {
+    public Page<ArticleDTO> getLatestArticleByPageAndTag(String tag, Pageable pageable) {
         return null;
     }
 
     @Override
-    public PaginatedArticleResponseDTO getLatestArticleByBookmarked(String email, int pageSize, int PageNum) {
+    public Page<ArticleDTO> getLatestArticleByBookmarked(String email, Pageable pageable) {
 
 
+        return null;
+    }
+
+    @Override
+    public Page<ArticleDTO> getLatestArticlesByFollowing(Pageable pageable) {
         return null;
     }
 }

@@ -1,28 +1,29 @@
 package com.cuongpn.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.cuongpn.enums.TagType;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class Tag {
     @Id
-    Long id;
-
-    String name;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private TagType tagType;
     @ManyToMany(mappedBy = "tags")
-    private Set<Article> articles = new HashSet<>();
+    private Set<Post> posts = new HashSet<>();
 
+    public Tag(String name, TagType tagType){
+        this.tagType = tagType;
+        this.name = name;
+    }
 
 
 }

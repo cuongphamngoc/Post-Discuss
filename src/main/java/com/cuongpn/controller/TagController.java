@@ -1,12 +1,15 @@
 package com.cuongpn.controller;
 
+import com.cuongpn.dto.requestDTO.CreateTagDTO;
 import com.cuongpn.dto.responeDTO.ResponseData;
 import com.cuongpn.dto.responeDTO.TagDTO;
 import com.cuongpn.service.TagService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,5 +21,10 @@ public class TagController {
     @GetMapping("/")
     public ResponseData<List<TagDTO>> getAllTag(){
         return tagService.findAll();
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/")
+    public ResponseData<TagDTO> handleCreateNewTag(@RequestBody @Valid CreateTagDTO createTagDTO){
+        return new ResponseData<>(HttpStatus.CREATED.value(), "Tag created successful",tagService.createNewTag(createTagDTO));
     }
 }

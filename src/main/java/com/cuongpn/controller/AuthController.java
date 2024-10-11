@@ -10,6 +10,7 @@ import com.cuongpn.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -21,7 +22,8 @@ public class AuthController {
     private AuthenticationService authenticationService;
     @PostMapping("/login")
     public ResponseData<TokenResponse> login(@Valid @RequestBody LoginRequestDTO request){
-        return authenticationService.login(request);
+        return new ResponseData<>(HttpStatus.OK.value(),
+                "Login Success!", authenticationService.login(request));
 
     }
     @GetMapping("/email-exists/{email}")
@@ -29,28 +31,35 @@ public class AuthController {
         return authenticationService.emailExists(email);
     }
     @PostMapping("/login/google")
-    public ResponseData<TokenResponse> loginWithGoogle(@Valid @RequestBody RefreshTokenRequestDTO request) throws IOException {
-        return authenticationService.loginWithGoogle(request);
+    public ResponseData<TokenResponse> loginWithGoogle(@Valid @RequestBody RefreshTokenDTO request) throws IOException {
+        return new ResponseData<>(HttpStatus.OK.value(),"Login Success!",
+            authenticationService.loginWithGoogle(request));
     }
     @PostMapping("/register")
     public ResponseData<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request)  {
-        return authenticationService.register(request);
+        return new ResponseData<>(HttpStatus.OK.value(),"Register Successful!",
+                authenticationService.register(request));
 
     }
     @PostMapping("/forgot-password")
-    public ResponseData<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request){
-        return authenticationService.forgot(request);
+    public ResponseData<?> forgotPassword(@Valid @RequestBody ForgotPasswordDTO request){
+        authenticationService.forgotPassword(request);
+        return new ResponseData<>(HttpStatus.OK.value(), "Mail sent successful");
+
     }
     @GetMapping("/verify-account/{token}")
     public ResponseData<?> accountVerification(@PathVariable("token") String token){
-        return authenticationService.verifyAccount(token);
+        authenticationService.verifyAccount(token);
+        return new ResponseData<>(HttpStatus.OK.value(), "Account Verification successful");
     }
     @PostMapping("/reset-password")
-    public ResponseData<?> resetPassword( @RequestBody ResetPasswordRequestDTO resetPasswordRequestDto){
-        return authenticationService.reset(resetPasswordRequestDto);
+    public ResponseData<?> resetPassword( @RequestBody ResetPasswordDTO resetPasswordDto){
+        authenticationService.resetPassword(resetPasswordDto);
+        return new ResponseData<>(HttpStatus.OK.value(), "Password change successful");
     }
     @PostMapping("/refresh-token")
-    public ResponseData<?> getNewToken(@Valid @RequestBody RefreshTokenRequestDTO refreshToken){
-        return authenticationService.getNewToken(refreshToken);
+    public ResponseData<TokenResponse> getNewToken(@Valid @RequestBody RefreshTokenDTO refreshToken){
+        return new ResponseData<>(HttpStatus.OK.value(),
+                "Refreshing token successful", authenticationService.getNewToken(refreshToken));
     }
 }

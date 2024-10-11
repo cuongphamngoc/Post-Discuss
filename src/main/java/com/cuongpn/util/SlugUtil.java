@@ -2,6 +2,7 @@ package com.cuongpn.util;
 
 import java.text.Normalizer;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class SlugUtil {
@@ -18,6 +19,9 @@ public class SlugUtil {
         String normalized = Normalizer.normalize(noWhitespace, Normalizer.Form.NFD);
         String slug = NONLATIN.matcher(normalized).replaceAll("");
         slug = EDGESHADES.matcher(slug).replaceAll("");
-        return slug.toLowerCase(Locale.ENGLISH);
+        slug = slug.toLowerCase(Locale.ENGLISH);
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+        return slug + "-" + uniqueId;
+
     }
 }

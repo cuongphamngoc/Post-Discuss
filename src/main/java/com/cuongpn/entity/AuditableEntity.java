@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 public abstract class AuditableEntity {
     @CreatedBy
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
 
@@ -26,7 +26,7 @@ public abstract class AuditableEntity {
     private LocalDateTime createdDate;
 
     @LastModifiedBy
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by")
     private User lastModifiedBy;
 

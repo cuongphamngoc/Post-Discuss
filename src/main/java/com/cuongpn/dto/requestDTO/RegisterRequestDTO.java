@@ -9,13 +9,13 @@ import java.io.Serializable;
 @Data
 public class RegisterRequestDTO {
     @Email
-    public String email;
+    private String email;
     @NotBlank
-    public String fullName;
+    private String fullName;
     @NotBlank
-    public String password;
+    private String password;
     @NotBlank
-    public String confirmPassword;
+    private String confirmPassword;
 
 
 

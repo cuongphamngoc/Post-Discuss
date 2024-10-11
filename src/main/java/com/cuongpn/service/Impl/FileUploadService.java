@@ -15,8 +15,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
-@Service
+//@Service
 
 public class FileUploadService implements FileService {
     private final Path rootLocation;
@@ -51,6 +52,12 @@ public class FileUploadService implements FileService {
             throw  new StorageException("Failed to store file.", e);
         }
     }
+
+    @Override
+    public CompletableFuture<FileResponseDTO> uploadImage(MultipartFile multipartFile) throws IOException {
+        return null;
+    }
+
     @Override
     public void init() {
         try {

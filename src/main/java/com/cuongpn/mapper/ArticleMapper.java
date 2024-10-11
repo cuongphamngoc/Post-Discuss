@@ -1,30 +1,33 @@
 package com.cuongpn.mapper;
 
-import com.cuongpn.dto.responeDTO.ArticleResponseDTO;
+import com.cuongpn.dto.responeDTO.ArticleDTO;
+import com.cuongpn.dto.responeDTO.ArticleDetailDTO;
+
 import com.cuongpn.entity.Article;
-import com.cuongpn.entity.Tag;
+
+import com.cuongpn.entity.Comment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
-import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-@Mapper
+
+@Mapper(componentModel = "spring", uses = {CommentMapper.class , VoteMapper.class , TagMapper.class})
 public interface ArticleMapper {
 
-    @Mapping(source = "user.userid",target = "author.id")
-    @Mapping(source = "user.name",target = "author.name")
-    @Mapping(source = "user.avatarUrl",target = "author.avatarUrl")
-    @Mapping(source = "createdAt",target = "createdAt")
-    ArticleResponseDTO articleToArticleResponseDTO(Article article);
-    default Set<String> mapTagsToStrings(Set<Tag> tags) {
-        if (tags == null) {
-            return Collections.emptySet(); // Trả về Set rỗng nếu tags là null
-        }
-        return tags.stream()
-                .map(Tag::getName) // Chuyển từ Tag sang String (lấy trường name)
-                .collect(Collectors.toSet());
+    @Mapping(source = "createdBy",target = "author")
+    @Mapping(source = "comments", target = "totalComments", qualifiedByName = "getTotalComments")
+
+    ArticleDTO toArticleDTO(Article article);
+
+
+    @Mapping(source = "createdBy",target = "author")
+    ArticleDetailDTO toArticleDetailDTO(Article article);
+    @Named("getTotalComments")
+    default int getTotalComments(Set<Comment> comments){
+        return comments.size();
     }
+
+
 }

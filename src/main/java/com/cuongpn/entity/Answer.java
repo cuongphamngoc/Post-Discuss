@@ -1,23 +1,28 @@
 package com.cuongpn.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class Answer extends AuditableEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(length = 2147483647,columnDefinition="Text")
-    private String content;
-    @ManyToOne
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@NamedEntityGraph(
+        name = "answerDetail",
+        attributeNodes = {
+                @NamedAttributeNode("createdBy"),
+                @NamedAttributeNode("comments"),
+                @NamedAttributeNode("votes")
+        }
+)
+public class Answer extends Post {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id")
     private Question question;
-    @OneToMany(mappedBy = "answer")
-    private List<AnswerComment> answerComments;
 
 }

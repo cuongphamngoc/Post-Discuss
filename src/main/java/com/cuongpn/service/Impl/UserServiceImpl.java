@@ -1,48 +1,64 @@
 package com.cuongpn.service.Impl;
 
-import com.cuongpn.dto.requestDTO.ChangePasswordRequestDTO;
-import com.cuongpn.dto.responeDTO.ResponseData;
+import com.cuongpn.dto.requestDTO.PasswordDTO;
 import com.cuongpn.dto.responeDTO.UserResponseDTO;
 import com.cuongpn.entity.Article;
+import com.cuongpn.entity.Role;
 import com.cuongpn.entity.User;
+import com.cuongpn.exception.AppException;
+import com.cuongpn.exception.ErrorCode;
 import com.cuongpn.mapper.UserMapper;
 import com.cuongpn.repository.UserRepository;
 import com.cuongpn.security.services.CurrentUser;
 import com.cuongpn.security.services.UserPrincipal;
 import com.cuongpn.service.ArticleService;
+import com.cuongpn.service.RoleService;
 import com.cuongpn.service.UserService;
-import lombok.AllArgsConstructor;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-
     private final UserMapper userMapper;
-
     private final ArticleService articleService;
-
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
     @Override
-    public ResponseData<List<UserResponseDTO>> getAllUser() {
-        List<UserResponseDTO> data =  userRepository.findAll().stream().map(user -> userMapper.userToUserResponseDTO(user)).toList();
-        ResponseData<List<UserResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK.value(), "Success",data);
-        return responseData;
+    public List<UserResponseDTO> getAllUser() {
+        return  userRepository.findAll().stream().map(userMapper::userToUserResponseDTO).toList();
     }
 
     @Override
-    public ResponseData<UserResponseDTO> getUserById(Long id)  {
-        User user = userRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Id not found " + id));
-        return new ResponseData<>(HttpStatus.OK.value(), "Success",userMapper.userToUserResponseDTO(user));
+    public UserResponseDTO getUserById(Long id)  {
+        User user = userRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.userToUserResponseDTO(user);
+    }
+
+    @Override
+    public User checkAndCreateUser(GoogleIdToken.Payload payload) {
+        return userRepository.findByEmail(payload.getEmail()).orElseGet(()->{
+              Role roleUser = roleService.findRoleByName("ROLE_USER");
+              User user = User.builder()
+                      .name((String) payload.get("name"))
+                      .isVerification(true)
+                      .avatarUrl((String) payload.get("picture"))
+                      .roles(Set.of(roleUser))
+                      .email(payload.getEmail())
+                      .build();
+              return  userRepository.save(user);
+        });
     }
 
     @Override
@@ -50,50 +66,33 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(mail).isPresent();
     }
 
-    @Override
-    public User checkAndCreateUser(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isPresent()) return null;
-        User newUser = new User(email,passwordEncoder.encode("12345"),"ROLE_USER");
-        userRepository.save(newUser);
-
-        return newUser;
-    }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User getUserByMail(String email) {
         return userRepository.findByEmail(email).orElseThrow(()-> new NoSuchElementException("Email not found " + email));
 
     }
 
     @Override
-    public ResponseData<?> changePassword(@CurrentUser UserPrincipal currentUser, ChangePasswordRequestDTO changePasswordRequestDto) {
+    public void changePassword(@CurrentUser UserPrincipal currentUser, PasswordDTO passwordDto) {
         User user = userRepository.findByEmail(currentUser.getEmail()).orElseThrow(()->new IllegalArgumentException("Current user is not authenticated!"));
 
-        if(!passwordEncoder.matches(changePasswordRequestDto.getOldPassword(), user.getPassword())){
-            throw new IllegalArgumentException("Old password not match");
+        if(!passwordEncoder.matches(passwordDto.getOldPassword(), user.getPassword())){
+            throw new AppException(ErrorCode.OLD_PASSWORD_NOT_MATCH);
         }
-        user.setPassword(passwordEncoder.encode(changePasswordRequestDto.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(passwordDto.getNewPassword()));
         userRepository.save(user);
-        return new ResponseData<>(HttpStatus.OK.value(), "Change password successful!");
     }
 
     @Override
-    public ResponseData<?> bookMarkArticle(UserPrincipal current, Long id) {
+    public void bookMarkArticle(UserPrincipal current, Long id) {
         User user = userRepository.findByEmail(current.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Current user is not authenticated!"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Article article = articleService.getArticleById(id);
 
 
-        if (user.getBookmarkedArticles().contains(article)) {
-            return new ResponseData<>(HttpStatus.BAD_REQUEST.value(), "Article already bookmarked");
-        }
-
-        user.getBookmarkedArticles().add(article);
-        userRepository.save(user);
-
-        return new ResponseData<>(HttpStatus.OK.value(), "Article bookmarked");
     }
 
 

@@ -1,29 +1,25 @@
 package com.cuongpn.service;
 
-import com.cuongpn.dto.requestDTO.ArticleRequestDTO;
-import com.cuongpn.dto.requestDTO.PageRequestDTO;
-import com.cuongpn.dto.responeDTO.ArticleResponseDTO;
-import com.cuongpn.dto.responeDTO.PaginatedArticleResponseDTO;
+import com.cuongpn.dto.requestDTO.CreateArticleDTO;
+import com.cuongpn.dto.responeDTO.ArticleDTO;
+import com.cuongpn.dto.responeDTO.ArticleDetailDTO;
 import com.cuongpn.entity.Article;
-import com.cuongpn.security.services.CurrentUser;
-import com.cuongpn.security.services.UserPrincipal;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface ArticleService {
-    public ArticleResponseDTO saveArticle(ArticleRequestDTO article);
+    ArticleDetailDTO saveArticle(CreateArticleDTO article);
 
-    public List<ArticleResponseDTO> getAll();
+    Page<ArticleDTO> getAll(Pageable pageable);
 
-    public ArticleResponseDTO getArticleBySlug(String slug);
+    ArticleDetailDTO getArticleBySlug(String slug);
 
-    public Article getArticleById(Long id);
+    Article getArticleById(Long id);
+    Page<ArticleDTO> getLatestArticleByPageAndTag(String tag, Pageable pageable);
 
 
-    public PaginatedArticleResponseDTO getLatestArticleByPage(int pageSize, int pageNum);
+    Page<ArticleDTO> getLatestArticleByBookmarked(String email, Pageable pageable);
 
-    public PaginatedArticleResponseDTO getLatestArticleByPageAndTag(String tag, int pageSize, int PageNum);
-
-    public PaginatedArticleResponseDTO getLatestArticleByBookmarked(String email,int pageSize, int PageNum);
+    Page<ArticleDTO> getLatestArticlesByFollowing(Pageable pageable);
 }

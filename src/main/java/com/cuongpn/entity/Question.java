@@ -1,17 +1,35 @@
 package com.cuongpn.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Question extends AuditableEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@NamedEntityGraph(
+        name = "Question.detail",
+        attributeNodes = {
+                @NamedAttributeNode("comments"),
+                @NamedAttributeNode("votes"),
+                @NamedAttributeNode("createdBy"),
+        }
+
+)
+public class Question extends Post  {
+
     private String title;
-    @Column(length = 2147483647,columnDefinition="Text")
-    private String content;
+    @Column(nullable = false,unique = true, length = 300)
+    private String slug;
+    @OneToMany(mappedBy = "question",orphanRemoval = true,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private Set<Answer> answers = new HashSet<>();
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "accepted_answer_id")
+    private Answer acceptedAnswer;
 }
