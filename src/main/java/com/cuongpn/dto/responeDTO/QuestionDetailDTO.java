@@ -18,10 +18,8 @@ public class QuestionDetailDTO {
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
     private AuthorDTO author;
-    private int totalComments;
-    private Page<AnswerDTO> answers;
+    private long totalComments;
     private AnswerDTO acceptedAnswer;
-    private long upVote;
-    private long downVote;
+    private long totalVote;
     private List<TagDTO> tags;
 }

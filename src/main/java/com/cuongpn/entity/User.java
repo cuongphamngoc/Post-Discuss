@@ -8,7 +8,6 @@ import org.springframework.data.annotation.CreatedDate;
 
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -31,7 +30,7 @@ public class User {
     private String name;
 
     private String password;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name="user_id"),
@@ -49,19 +48,25 @@ public class User {
 
     private String verificationToken;
 
+    private String provider;
 
-    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private Set<Post> posts;
+    private String providerId;
 
-    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Comment> comments;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinTable(name = "user_bookmarks",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "post_id"))
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "users", cascade =  CascadeType.ALL)
     private Set<Post> bookmarks = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_following",
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name = "followed_id")
+    )
+    private Set<User> following = new HashSet<>();
+    @ManyToMany(mappedBy = "following",fetch = FetchType.LAZY)
+    private Set<User> followers = new HashSet<>();
+
+    @ManyToMany(mappedBy = "questionFollowers",fetch = FetchType.LAZY)
+    private Set<Question> questions = new HashSet<>();
 
 
 }

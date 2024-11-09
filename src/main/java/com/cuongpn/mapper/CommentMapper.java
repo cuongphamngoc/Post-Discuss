@@ -21,7 +21,6 @@ public interface CommentMapper {
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
     @Mapping(source = "createdBy",target = "author")
-    @Mapping(source = "replies",target = "repliesCount")
     CommentDTO toCommentDTO(Comment comment);
     default int commentSetToInt(Set<Comment> comments){
         return comments.size();

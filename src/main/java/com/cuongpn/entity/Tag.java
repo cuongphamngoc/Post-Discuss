@@ -17,7 +17,7 @@ public class Tag {
     private Long id;
     private String name;
     private TagType tagType;
-    @ManyToMany(mappedBy = "tags")
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
     private Set<Post> posts = new HashSet<>();
 
     public Tag(String name, TagType tagType){

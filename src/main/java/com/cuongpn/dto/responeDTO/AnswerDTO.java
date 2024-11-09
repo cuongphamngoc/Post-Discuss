@@ -17,8 +17,8 @@ public class AnswerDTO {
     private LocalDateTime lastModifiedDate;
     private AuthorDTO author;
     private int totalComments;
-    private long upVote;
-    private long downVote;
+    private long totalVote;
+
 
 
 }

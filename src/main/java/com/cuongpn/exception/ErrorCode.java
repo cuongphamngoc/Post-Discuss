@@ -19,8 +19,8 @@ public enum ErrorCode {
     QUESTION_NOT_EXISTED(1011,"Question is not existed"),
     USER_NOT_QUESTION_OWNER(1012,"User is not own question"),
     ANSWER_NOT_EXISTED(1013,"Answer is not existed"),
-    ANSWER_NOT_BELONG_QUESTION(1014,"Answer is not belong to question");
-
+    ANSWER_NOT_BELONG_QUESTION(1014,"Answer is not belong to question"),
+;
 
 
     ErrorCode(int code, String message){

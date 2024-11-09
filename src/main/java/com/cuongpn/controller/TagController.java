@@ -18,12 +18,12 @@ import java.util.List;
 @AllArgsConstructor
 public class TagController {
     private final TagService tagService;
-    @GetMapping("/")
+    @GetMapping
     public ResponseData<List<TagDTO>> getAllTag(){
         return tagService.findAll();
     }
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/")
+    @PostMapping
     public ResponseData<TagDTO> handleCreateNewTag(@RequestBody @Valid CreateTagDTO createTagDTO){
         return new ResponseData<>(HttpStatus.CREATED.value(), "Tag created successful",tagService.createNewTag(createTagDTO));
     }

@@ -30,17 +30,7 @@ public class RestExceptionHandler   {
 
 
     }
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseError handlerDuplicatedUsernameException(IllegalArgumentException e, WebRequest request){
-        String requestPath = request.getDescription(false).replace("uri=", "");
-        return ResponseError.builder()
-                .timestamp(new Date())
-                .path(requestPath)
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Username is taken")
-                .build();
-    }
+
     @ExceptionHandler(StorageException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseError handleFileException(StorageException e, WebRequest request){
@@ -55,18 +45,7 @@ public class RestExceptionHandler   {
 
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseError handlerGlobalException(Exception e, WebRequest request){
-        String requestPath = request.getDescription(false).replace("uri=", "");
-        return ResponseError.builder()
-                .timestamp(new Date())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .path(requestPath)
-                .error(e.getMessage())
-                .build();
 
-    }
 
 
 

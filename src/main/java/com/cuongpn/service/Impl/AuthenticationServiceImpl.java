@@ -69,8 +69,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         System.out.println(authentication.getPrincipal());
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        return new TokenResponse(jwtProvider.generateAccessToken(userPrincipal),
-                jwtProvider.generateRefreshToken(userPrincipal));
+        String accessToken = jwtProvider.generateAccessToken(userPrincipal);
+        String refreshToken = jwtProvider.generateRefreshToken(userPrincipal);
+        return new TokenResponse(accessToken,refreshToken);
+
 
     }
 
@@ -141,15 +143,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public TokenResponse loginWithGoogle(RefreshTokenDTO request) throws IOException {
-        final NetHttpTransport transport = new NetHttpTransport();
-        final JacksonFactory jacksonFactory = JacksonFactory.getDefaultInstance();
-        GoogleIdTokenVerifier.Builder verifier = new GoogleIdTokenVerifier.Builder(transport,jacksonFactory)
-                .setAudience(Collections.singletonList(googleClientId));
-        final GoogleIdToken googleIdToken = GoogleIdToken.parse(verifier.getJsonFactory(),request.getToken());
-        final GoogleIdToken.Payload payload = googleIdToken.getPayload();
-        User user = userService.checkAndCreateUser(payload);
-        return login(user);
+    public TokenResponse OAuth2Authentication(String code, String provider) throws IOException {
+        switch (provider){
+            case "google":
+            {
+                final NetHttpTransport transport = new NetHttpTransport();
+                final JacksonFactory jacksonFactory = JacksonFactory.getDefaultInstance();
+                GoogleIdTokenVerifier.Builder verifier = new GoogleIdTokenVerifier.Builder(transport,jacksonFactory)
+                        .setAudience(Collections.singletonList(googleClientId));
+                final GoogleIdToken googleIdToken = GoogleIdToken.parse(verifier.getJsonFactory(),code);
+                final GoogleIdToken.Payload payload = googleIdToken.getPayload();
+                User user = userService.checkAndCreateUser(payload);
+                return login(user);
+            }
+            case "facebook":{
+
+            }
+            case "github":{
+
+            }
+            default:{
+                throw new AppException(ErrorCode.POST_NOT_EXISTED);
+            }
+        }
     }
 
 
@@ -159,9 +175,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public TokenResponse getNewToken(RefreshTokenDTO refreshToken) {
-        jwtProvider.validateToken(refreshToken.getToken());
-        Claims claims = jwtProvider.getClaimsFromToken(refreshToken.getToken());
+    public TokenResponse getNewToken(String refreshToken) {
+        jwtProvider.validateToken(refreshToken);
+        Claims claims = jwtProvider.getClaimsFromToken(refreshToken);
         String newAccessToken = jwtProvider.generateAccessTokenFromClaims(claims);
         String newRefreshToken = jwtProvider.generateRefreshTokenFromClaims(claims);
         return new TokenResponse(newAccessToken,newRefreshToken);

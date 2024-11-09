@@ -1,12 +1,16 @@
 package com.cuongpn.security.Jwt;
 
+import com.cuongpn.entity.User;
 import com.cuongpn.exception.InvalidTokenException;
 import com.cuongpn.security.services.UserPrincipal;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtProvider {
@@ -24,13 +28,26 @@ public class JwtProvider {
 
         return Jwts
                 .builder()
-                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .setSubject(userPrincipal.getEmail())
                 .setIssuedAt(now)
                 .setExpiration(expirationTime)
-                .claim("avatarUrl",userPrincipal.getAvatarUrl())
-                .claim("scope",userPrincipal.getAuthorities())
-                .claim("fullName",userPrincipal.getFullName())
+                .claim("authorities",userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .claim("id",userPrincipal.getId())
+                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
+                .compact();
+    }
+    public String generateAccessToken(User user){
+        Date now = new Date();
+        Date expirationTime = new Date(now.getTime() + accessTokenExpirationTime);
+
+        return Jwts
+                .builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(now)
+                .setExpiration(expirationTime)
+                .claim("authorities",user.getRoles().stream().map((role)-> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()))
+                .claim("id",user.getId())
+                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .compact();
     }
     public String generateRefreshToken(UserPrincipal userPrincipal){
@@ -38,13 +55,25 @@ public class JwtProvider {
         Date expirationTime = new Date(now.getTime() + refreshTokenExpirationTime);
         return Jwts
                 .builder()
-                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .setSubject(userPrincipal.getEmail())
                 .setIssuedAt(now)
                 .setExpiration(expirationTime)
-                .claim("avatarUrl",userPrincipal.getAvatarUrl())
-                .claim("scope",userPrincipal.getAuthorities())
-                .claim("fullName",userPrincipal.getFullName())
+                .claim("authorities",userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .claim("id",userPrincipal.getId())
+                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
+                .compact();
+    }
+    public String generateRefreshToken(User user){
+        Date now = new Date();
+        Date expirationTime = new Date(now.getTime() + refreshTokenExpirationTime);
+        return Jwts
+                .builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(now)
+                .setExpiration(expirationTime)
+                .claim("authorities",user.getRoles().stream().map((role)-> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()))
+                .claim("id",user.getId())
+                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .compact();
     }
 
@@ -82,20 +111,20 @@ public class JwtProvider {
         Date now = new Date();
         Date expirationTime = new Date(now.getTime() + accessTokenExpirationTime);
         return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expirationTime)
+                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .compact();
     }
     public String generateRefreshTokenFromClaims(Claims claims){
         Date now = new Date();
         Date expirationTime = new Date(now.getTime() + refreshTokenExpirationTime);
         return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expirationTime)
+                .signWith(SignatureAlgorithm.HS512,SECRET_KEY)
                 .compact();
     }
 }

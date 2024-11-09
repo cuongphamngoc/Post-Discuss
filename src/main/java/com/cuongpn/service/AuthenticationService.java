@@ -10,20 +10,20 @@ import java.io.IOException;
 
 public interface AuthenticationService {
 
-    public TokenResponse login(LoginRequestDTO request) ;
+    TokenResponse login(LoginRequestDTO request) ;
 
     TokenResponse login(User user);
 
     UserResponseDTO register(RegisterRequestDTO request) throws UserAlreadyExistException;
 
-    public void forgotPassword(ForgotPasswordDTO request);
+    void forgotPassword(ForgotPasswordDTO request);
 
-    public void verifyAccount(String token );
+    void verifyAccount(String token );
 
     void resetPassword(ResetPasswordDTO resetPasswordDto);
 
-    TokenResponse loginWithGoogle(RefreshTokenDTO request) throws IOException;
+    TokenResponse OAuth2Authentication(String code, String provider) throws IOException;
     boolean emailExists(String mail);
 
-    TokenResponse getNewToken(RefreshTokenDTO refreshToken);
+    TokenResponse getNewToken(String refreshToken);
 }

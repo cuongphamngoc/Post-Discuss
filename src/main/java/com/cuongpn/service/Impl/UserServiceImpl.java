@@ -3,11 +3,13 @@ package com.cuongpn.service.Impl;
 import com.cuongpn.dto.requestDTO.PasswordDTO;
 import com.cuongpn.dto.responeDTO.UserResponseDTO;
 import com.cuongpn.entity.Article;
+import com.cuongpn.entity.Post;
 import com.cuongpn.entity.Role;
 import com.cuongpn.entity.User;
 import com.cuongpn.exception.AppException;
 import com.cuongpn.exception.ErrorCode;
 import com.cuongpn.mapper.UserMapper;
+import com.cuongpn.repository.PostRepository;
 import com.cuongpn.repository.UserRepository;
 import com.cuongpn.security.services.CurrentUser;
 import com.cuongpn.security.services.UserPrincipal;
@@ -32,9 +34,10 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final ArticleService articleService;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final PostRepository postRepository;
+
     @Override
     public List<UserResponseDTO> getAllUser() {
         return  userRepository.findAll().stream().map(userMapper::userToUserResponseDTO).toList();
@@ -43,6 +46,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO getUserById(Long id)  {
         User user = userRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.userToUserResponseDTO(user);
+    }
+
+    @Override
+    public UserResponseDTO getUserInfo(UserPrincipal userPrincipal) {
+        User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.userToUserResponseDTO(user);
     }
 
@@ -70,7 +79,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User getUserByMail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(()-> new NoSuchElementException("Email not found " + email));
+        return userRepository.findByEmail(email).orElseGet(()-> null);
 
     }
 
@@ -86,15 +95,68 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void bookMarkArticle(UserPrincipal current, Long id) {
+    @Transactional
+    public boolean handleFollowingUser(UserPrincipal current, Long userid) {
+        if(current == null) return false;
         User user = userRepository.findByEmail(current.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        Article article = articleService.getArticleById(id);
+        User followingUser = userRepository.findById(userid)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        Set<User> users = user.getFollowing();
+        if(!users.contains(followingUser)){
+            users.add(followingUser);
+            userRepository.save(user);
+            return true;
+        }
+        else{
+            users.remove(followingUser);
+            userRepository.save(user);
+            return false;
+        }
 
     }
 
+    @Override
+    public boolean checkFollowingStatus(UserPrincipal userPrincipal, Long authorId) {
+        if(userPrincipal == null) return false;
+        User author = userRepository.findById(authorId).orElseThrow(
+                ()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User current = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(
+                ()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return current.getFollowing().contains(author);
+    }
+
+    @Override
+    public boolean checkBookmarkStatus(UserPrincipal userPrincipal, Long postId) {
+        if(userPrincipal == null) return false;
+        Post post = postRepository.findById(postId).orElseThrow(()-> new AppException(ErrorCode.POST_NOT_EXISTED));
+
+        User current = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(
+                ()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return current.getBookmarks().contains(post);
+    }
+
+    @Override
+    public boolean bookmarkPost(UserPrincipal userPrincipal, Long postId) {
+        if(userPrincipal == null) return false;
+        Post post = postRepository.findById(postId).orElseThrow(()-> new AppException(ErrorCode.POST_NOT_EXISTED));
+        User current = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(
+                ()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        List<User> bookmarkUsers = post.getUsers();
+        if(bookmarkUsers.contains(current)){
+            bookmarkUsers.remove(current);
+            postRepository.save(post);
+            return false;
+        }
+        else{
+            bookmarkUsers.add(current);
+            postRepository.save(post);
+            return true;
+        }
+
+    }
 
 
 }

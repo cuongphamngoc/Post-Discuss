@@ -21,6 +21,7 @@ public class ArticleDTO {
     private String slug;
 
     private String summary;
+    private String contentType;
 
     private String imageUrl;
 
@@ -34,9 +35,9 @@ public class ArticleDTO {
 
     private int totalComments;
 
-    private long upVote;
-
-    private long downVote;
+    private long totalVote;
 
     private AuthorDTO author;
+
+    private boolean isFeatures;
 }

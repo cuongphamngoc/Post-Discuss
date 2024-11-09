@@ -36,6 +36,12 @@ public class QuestionController {
         return new ResponseData<>(HttpStatus.OK.value(), "Successful",questionService.findQuestionDetailBySlug(slug,pageable));
     }
 
+    @GetMapping("/unsolved")
+    public ResponseData<?> getUnsolvedQuestions(Pageable pageable){
+        return  new ResponseData<>(HttpStatus.OK.value(), "Successful",questionService.findUnsolvedQuestions(pageable));
+
+    }
+
 
 
 

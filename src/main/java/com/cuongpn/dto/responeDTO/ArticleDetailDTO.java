@@ -35,9 +35,11 @@ public class ArticleDetailDTO {
 
     private Page<CommentDTO> comments;
 
-    private long upVote;
+    private long totalVote;
 
-    private long downVote;
+    private String userVote;
 
     private AuthorDTO author;
+
+
 }

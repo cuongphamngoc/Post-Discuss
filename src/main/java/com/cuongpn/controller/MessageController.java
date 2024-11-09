@@ -17,7 +17,7 @@ import java.util.List;
 public class MessageController {
     private final MessageService messageService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseData<List<MessageResponseDTO>> getAll(){
         return messageService.findAll();
     }

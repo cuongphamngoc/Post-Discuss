@@ -2,6 +2,7 @@ package com.cuongpn.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,31 +13,36 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Article")
-@Builder
 @Getter
 @Setter
+@DiscriminatorValue("ARTICLE")
 @NamedEntityGraph(
         name = "ArticleDetail",
         attributeNodes = {
                 @NamedAttributeNode("createdBy"),
-                @NamedAttributeNode("votes")
+                @NamedAttributeNode("votes"),
+                @NamedAttributeNode("tags"),
+                @NamedAttributeNode("comments")
         }
 )
+
 public class Article extends Post{
 
-    @Column(nullable = false)
-    private String title;
-    @Column(nullable = false,unique = true, length = 300)
-    private String slug;
-    @Column(nullable = false,unique = true, length = 300)
+    @Column(length = 300)
     private String summary;
 
     private String imageUrl;
-    @Column
-    private Long views;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "series_id")
+    private Series series;
+    @Column(name = "is_features")
+    private boolean isFeatures = false;
+
 
 
 }

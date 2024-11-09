@@ -16,6 +16,8 @@ public class CommentDTO {
     private AuthorDTO author;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
-    private int repliesCount;
+    private Long repliesCount;
+    private Long totalVote;
+    private String userVote;
 
 }

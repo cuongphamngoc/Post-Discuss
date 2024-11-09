@@ -11,7 +11,7 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 
-@Mapper(componentModel = "spring", uses = {AnswerMapper.class, CommentMapper.class})
+@Mapper(componentModel = "spring", uses = {AnswerMapper.class})
 public interface QuestionMapper {
 
     QuestionMapper INSTANCE = Mappers.getMapper(QuestionMapper.class);

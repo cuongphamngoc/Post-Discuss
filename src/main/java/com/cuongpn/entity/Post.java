@@ -1,36 +1,34 @@
 package com.cuongpn.entity;
 
-import com.cuongpn.enums.VoteType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
-
-public abstract  class Post extends AuditableEntity{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
-
-    @Column(columnDefinition="TEXT")
-    protected String content;
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    protected Set<Comment> comments = new HashSet<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    protected Set<Vote> votes = new HashSet<>();
+@Entity
+@SuperBuilder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "content_type", discriminatorType = DiscriminatorType.STRING)
+public abstract class Post extends Content{
 
 
+    private String title;
+
+    @Column(unique = true, length = 300)
+    private String slug;
+
+    @Column
+    private Long views;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -38,13 +36,13 @@ public abstract  class Post extends AuditableEntity{
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    protected Set<Tag> tags = new HashSet<>();
+    private Set<Tag> tags = new HashSet<>();
 
-    public long getUpVote(){
-        return votes.stream().filter(vote->vote.getVoteType() == VoteType.UP).count();
-    }
-    public long getDownVote(){
-        return votes.stream().filter(vote->vote.getVoteType() == VoteType.DOWN).count();
-    }
+    @ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @JoinTable(name = "post_bookmarks",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<User> users = new ArrayList<>();
+
 
 }

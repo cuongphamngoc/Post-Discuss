@@ -30,7 +30,11 @@ class QuestionServiceImplTest {
     @Test
     public void shouldReturnSuccessWhenRequestValid(){
         //given
-        CreateQuestionDTO createQuestionDTO = new CreateQuestionDTO("Abc","zxcz", List.of());
+        CreateQuestionDTO createQuestionDTO = CreateQuestionDTO.builder()
+                .content("zxczx")
+                .title("Abc")
+                .tags(List.of())
+                .build();
 
         Question response = Question.builder()
                 .title("Abc")

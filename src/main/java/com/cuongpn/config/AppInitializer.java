@@ -13,6 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,10 +40,15 @@ public class AppInitializer {
     private String adminTag;
 
     @Bean
+    @Transactional
     public CommandLineRunner commandLineRunner() {
         return args -> {
             Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseGet(()->{
                 Role role = new Role("ROLE_ADMIN");
+                return roleRepository.save(role);
+            });
+            Role userRole = roleRepository.findByName("ROLE_USER").orElseGet(()->{
+                Role role = new Role("ROLE_USER");
                 return roleRepository.save(role);
             });
             if(adminRole.getUsers().isEmpty()){

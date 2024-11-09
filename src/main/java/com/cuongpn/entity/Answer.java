@@ -2,16 +2,20 @@ package com.cuongpn.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@SuperBuilder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@DiscriminatorValue("ANSWER")
+
 @NamedEntityGraph(
         name = "answerDetail",
         attributeNodes = {
@@ -20,7 +24,7 @@ import java.util.Set;
                 @NamedAttributeNode("votes")
         }
 )
-public class Answer extends Post {
+public class Answer extends Content{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
     private Question question;
